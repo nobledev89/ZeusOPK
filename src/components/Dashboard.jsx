@@ -49,20 +49,32 @@ const Dashboard = () => {
       // Fetch recent users
       const { data: recent, error: recentError } = await supabase
         .from('users')
-        .select(`
-          id,
-          username,
-          subscription_status,
-          is_banned,
-          created_at,
-          subscription_tiers (name)
-        `)
+        .select('id, username, subscription_status, is_banned, created_at, subscription_tier_id')
         .order('created_at', { ascending: false })
         .limit(10)
 
       if (recentError) throw recentError
 
-      setRecentUsers(recent)
+      // Fetch subscription tiers
+      const { data: tiersData, error: tiersError } = await supabase
+        .from('subscription_tiers')
+        .select('id, name')
+
+      if (tiersError) throw tiersError
+
+      // Create lookup map
+      const tiersMap = {}
+      tiersData?.forEach(tier => {
+        tiersMap[tier.id] = tier
+      })
+
+      // Enrich recent users with tier data
+      const enrichedRecent = recent.map(user => ({
+        ...user,
+        subscription_tiers: user.subscription_tier_id ? tiersMap[user.subscription_tier_id] : null
+      }))
+
+      setRecentUsers(enrichedRecent)
     } catch (error) {
       console.error('Error fetching dashboard data:', error)
       toast.error('Failed to load dashboard data')

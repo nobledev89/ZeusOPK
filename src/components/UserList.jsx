@@ -25,19 +25,48 @@ const UserList = () => {
   const fetchUsers = async () => {
     setLoading(true)
     try {
-      const { data, error } = await supabase
+      // Fetch users
+      const { data: usersData, error: usersError } = await supabase
         .from('users')
-        .select(`
-          *,
-          subscription_tiers (name),
-          game_servers (server_name)
-        `)
+        .select('*')
         .order('created_at', { ascending: false })
 
-      if (error) throw error
+      if (usersError) throw usersError
 
-      setUsers(data)
-      setFilteredUsers(data)
+      // Fetch subscription tiers
+      const { data: tiersData, error: tiersError } = await supabase
+        .from('subscription_tiers')
+        .select('id, name')
+
+      if (tiersError) throw tiersError
+
+      // Fetch game servers
+      const { data: serversData, error: serversError } = await supabase
+        .from('game_servers')
+        .select('id, server_name')
+
+      if (serversError) throw serversError
+
+      // Create lookup maps
+      const tiersMap = {}
+      tiersData?.forEach(tier => {
+        tiersMap[tier.id] = tier
+      })
+
+      const serversMap = {}
+      serversData?.forEach(server => {
+        serversMap[server.id] = server
+      })
+
+      // Combine the data
+      const enrichedUsers = usersData.map(user => ({
+        ...user,
+        subscription_tiers: user.subscription_tier_id ? tiersMap[user.subscription_tier_id] : null,
+        game_servers: user.server_id ? serversMap[user.server_id] : null
+      }))
+
+      setUsers(enrichedUsers)
+      setFilteredUsers(enrichedUsers)
     } catch (error) {
       console.error('Error fetching users:', error)
       toast.error('Failed to load users')

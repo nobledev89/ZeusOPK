@@ -20,19 +20,45 @@ const UserDetails = ({ user, onClose }) => {
   const fetchUserDetails = async () => {
     setLoading(true)
     try {
-      // Fetch user with relations
+      // Fetch user
       const { data: userDetail, error: userError } = await supabase
         .from('users')
-        .select(`
-          *,
-          subscription_tiers (id, name, max_bots),
-          game_servers (id, server_name)
-        `)
+        .select('*')
         .eq('id', user.id)
         .single()
 
       if (userError) throw userError
-      setUserData(userDetail)
+
+      // Fetch subscription tier if user has one
+      let tierData = null
+      if (userDetail.subscription_tier_id) {
+        const { data, error } = await supabase
+          .from('subscription_tiers')
+          .select('id, name, max_bots')
+          .eq('id', userDetail.subscription_tier_id)
+          .single()
+        
+        if (!error) tierData = data
+      }
+
+      // Fetch game server if user has one
+      let serverData = null
+      if (userDetail.server_id) {
+        const { data, error } = await supabase
+          .from('game_servers')
+          .select('id, server_name')
+          .eq('id', userDetail.server_id)
+          .single()
+        
+        if (!error) serverData = data
+      }
+
+      // Combine the data
+      setUserData({
+        ...userDetail,
+        subscription_tiers: tierData,
+        game_servers: serverData
+      })
 
       // Fetch sessions
       const { data: sessionsData, error: sessionsError } = await supabase
