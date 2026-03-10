@@ -1,0 +1,1 @@
+Everytime changes are made, deploy to git branch "main" so it will deploy to vercel.
