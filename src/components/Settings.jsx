@@ -380,6 +380,29 @@ const Settings = () => {
               />
             </div>
 
+            <div>
+              <label className="block text-sm font-medium text-white mb-2">
+                Allow &lt;NO_REPLY&gt; Responses
+              </label>
+              <p className="text-sm text-gray-400 mb-2">
+                If disabled, providers are required to produce a reply and will fallback to next provider on &lt;NO_REPLY&gt;
+              </p>
+              <div className="flex items-center">
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={(settings.ai_allow_no_reply || 'false') === 'true'}
+                    onChange={(e) => handleChange('ai_allow_no_reply', e.target.checked ? 'true' : 'false')}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                  <span className="ml-3 text-sm font-medium text-gray-300">
+                    {(settings.ai_allow_no_reply || 'false') === 'true' ? 'Enabled' : 'Disabled'}
+                  </span>
+                </label>
+              </div>
+            </div>
+
             {/* Gemini API Key */}
             <div>
               <label className="block text-sm font-medium text-white mb-2">
