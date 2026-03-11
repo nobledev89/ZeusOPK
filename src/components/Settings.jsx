@@ -198,6 +198,189 @@ const Settings = () => {
           </div>
         </div>
 
+        {/* AI Chat Settings Section */}
+        <div className="mt-8 pt-8 border-t border-gray-700">
+          <h2 className="text-2xl font-bold text-white mb-6">AI Chat Settings</h2>
+          <p className="text-sm text-gray-400 mb-6">
+            Configure global AI chat integration. API keys are admin-controlled to manage costs and prevent abuse.
+          </p>
+
+          <div className="space-y-6">
+            {/* Gemini API Key */}
+            <div>
+              <label className="block text-sm font-medium text-white mb-2">
+                Gemini API Key
+              </label>
+              <p className="text-sm text-gray-400 mb-2">
+                Your Google Gemini API key for AI chat functionality (leave empty to disable AI globally)
+              </p>
+              <input
+                type="password"
+                placeholder="Enter API key or leave empty to disable"
+                value={settings.ai_gemini_api_key || ''}
+                onChange={(e) => handleChange('ai_gemini_api_key', e.target.value)}
+                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              />
+            </div>
+
+            {/* Gemini Model */}
+            <div>
+              <label className="block text-sm font-medium text-white mb-2">
+                Gemini Model
+              </label>
+              <p className="text-sm text-gray-400 mb-2">
+                Default Gemini model to use (e.g., gemini-2.5-flash)
+              </p>
+              <input
+                type="text"
+                placeholder="gemini-2.5-flash"
+                value={settings.ai_gemini_model || ''}
+                onChange={(e) => handleChange('ai_gemini_model', e.target.value)}
+                className="w-full md:w-1/2 px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              />
+            </div>
+
+            {/* AI Timeout and Limits */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-white mb-2">
+                  Request Timeout (Seconds)
+                </label>
+                <p className="text-sm text-gray-400 mb-2">
+                  Maximum time to wait for AI response
+                </p>
+                <input
+                  type="number"
+                  min="5"
+                  max="60"
+                  value={settings.ai_request_timeout_seconds || ''}
+                  onChange={(e) => handleChange('ai_request_timeout_seconds', e.target.value)}
+                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-white mb-2">
+                  Reply Delay (Seconds)
+                </label>
+                <p className="text-sm text-gray-400 mb-2">
+                  Delay before sending reply (appear more human)
+                </p>
+                <input
+                  type="number"
+                  min="0"
+                  max="10"
+                  value={settings.ai_reply_delay_seconds || ''}
+                  onChange={(e) => handleChange('ai_reply_delay_seconds', e.target.value)}
+                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-white mb-2">
+                  Max Input Characters
+                </label>
+                <p className="text-sm text-gray-400 mb-2">
+                  Maximum characters to accept from user messages
+                </p>
+                <input
+                  type="number"
+                  min="50"
+                  max="1000"
+                  value={settings.ai_max_input_chars || ''}
+                  onChange={(e) => handleChange('ai_max_input_chars', e.target.value)}
+                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-white mb-2">
+                  Max Reply Characters
+                </label>
+                <p className="text-sm text-gray-400 mb-2">
+                  Maximum characters in AI replies
+                </p>
+                <input
+                  type="number"
+                  min="50"
+                  max="500"
+                  value={settings.ai_max_reply_chars || ''}
+                  onChange={(e) => handleChange('ai_max_reply_chars', e.target.value)}
+                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-white mb-2">
+                  Max Output Tokens
+                </label>
+                <p className="text-sm text-gray-400 mb-2">
+                  Maximum tokens for AI generation
+                </p>
+                <input
+                  type="number"
+                  min="32"
+                  max="500"
+                  value={settings.ai_max_output_tokens || ''}
+                  onChange={(e) => handleChange('ai_max_output_tokens', e.target.value)}
+                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-white mb-2">
+                  Cooldown Per User (Seconds)
+                </label>
+                <p className="text-sm text-gray-400 mb-2">
+                  Time between replies to the same user
+                </p>
+                <input
+                  type="number"
+                  min="0"
+                  max="300"
+                  value={settings.ai_cooldown_seconds || ''}
+                  onChange={(e) => handleChange('ai_cooldown_seconds', e.target.value)}
+                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-white mb-2">
+                  Max Replies Per User
+                </label>
+                <p className="text-sm text-gray-400 mb-2">
+                  Maximum AI replies per user per session
+                </p>
+                <input
+                  type="number"
+                  min="0"
+                  max="10"
+                  value={settings.ai_max_replies_per_user || ''}
+                  onChange={(e) => handleChange('ai_max_replies_per_user', e.target.value)}
+                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
+            </div>
+
+            {/* AI System Prompt */}
+            <div>
+              <label className="block text-sm font-medium text-white mb-2">
+                Default System Prompt
+              </label>
+              <p className="text-sm text-gray-400 mb-2">
+                Instructions for AI behavior (supports Tagalog/mixed language, informal responses)
+              </p>
+              <textarea
+                rows="6"
+                value={settings.ai_system_prompt || ''}
+                onChange={(e) => handleChange('ai_system_prompt', e.target.value)}
+                placeholder="You are a casual Ragnarok Online player chatting with others..."
+                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono text-sm"
+              />
+            </div>
+          </div>
+        </div>
+
         {/* Save Button */}
         <div className="mt-8 pt-6 border-t border-gray-700">
           <button

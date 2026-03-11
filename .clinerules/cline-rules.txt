@@ -1,1 +1,2 @@
-Everytime changes are made, deploy to git branch "main" so it will deploy to vercel.
+Everytime changes are made, deploy to git branch "main" so it will deploy to vercel. https://github.com/nobledev89/ZeusOPK
+I am building in production. No need to build locally everytime unless you need to check if there are no build errors.
