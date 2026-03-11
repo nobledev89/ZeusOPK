@@ -85,11 +85,78 @@ const Settings = () => {
   }
 
   const handleTestAiConnection = async () => {
-    const apiKey = (settings.ai_gemini_api_key || '').trim()
-    const model = (settings.ai_gemini_model || 'gemini-2.5-flash').trim()
+    const provider = (settings.ai_primary_provider || 'gemini').trim().toLowerCase()
+    let apiKey = ''
+    let model = ''
+    let url = ''
+    let requestOptions = null
+
+    if (provider === 'openai') {
+      apiKey = (settings.ai_openai_api_key || '').trim()
+      model = (settings.ai_openai_model || 'gpt-4o-mini').trim()
+      url = 'https://api.openai.com/v1/chat/completions'
+      requestOptions = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model,
+          messages: [
+            { role: 'system', content: 'You are a health check endpoint.' },
+            { role: 'user', content: 'Reply with OK only.' }
+          ],
+          max_tokens: 8,
+          temperature: 0
+        })
+      }
+    } else if (provider === 'anthropic') {
+      apiKey = (settings.ai_anthropic_api_key || '').trim()
+      model = (settings.ai_anthropic_model || 'claude-3-5-haiku-latest').trim()
+      url = 'https://api.anthropic.com/v1/messages'
+      requestOptions = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01'
+        },
+        body: JSON.stringify({
+          model,
+          max_tokens: 8,
+          temperature: 0,
+          messages: [
+            { role: 'user', content: 'Reply with OK only.' }
+          ]
+        })
+      }
+    } else {
+      apiKey = (settings.ai_gemini_api_key || '').trim()
+      model = (settings.ai_gemini_model || 'gemini-2.5-flash').trim()
+      url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`
+      requestOptions = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              role: 'user',
+              parts: [{ text: 'Reply with OK only.' }],
+            },
+          ],
+          generationConfig: {
+            maxOutputTokens: 8,
+            temperature: 0,
+          },
+        }),
+      }
+    }
 
     if (!apiKey) {
-      toast.error('Please enter the Gemini API key first')
+      toast.error(`Please enter the ${provider} API key first`)
       return
     }
 
@@ -97,43 +164,23 @@ const Settings = () => {
     setConnectionStatus(null)
 
     try {
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            contents: [
-              {
-                role: 'user',
-                parts: [{ text: 'Reply with OK only.' }],
-              },
-            ],
-            generationConfig: {
-              maxOutputTokens: 8,
-              temperature: 0,
-            },
-          }),
-        }
-      )
+      const response = await fetch(url, requestOptions)
 
       const data = await response.json().catch(() => ({}))
 
       if (!response.ok) {
-        const errorMessage = data?.error?.message || `HTTP ${response.status}`
-        setConnectionStatus({ ok: false, model, message: errorMessage })
-        toast.error(`AI connection failed: ${errorMessage}`)
+        const errorMessage = data?.error?.message || data?.message || `HTTP ${response.status}`
+        setConnectionStatus({ ok: false, provider, model, message: errorMessage })
+        toast.error(`${provider} connection failed: ${errorMessage}`)
         return
       }
 
-      setConnectionStatus({ ok: true, model, message: 'Connection successful' })
-      toast.success(`AI connection successful (${model})`)
+      setConnectionStatus({ ok: true, provider, model, message: 'Connection successful' })
+      toast.success(`${provider} connection successful (${model})`)
     } catch (error) {
       const errorMessage = error?.message || 'Network error while testing connection'
-      setConnectionStatus({ ok: false, model, message: errorMessage })
-      toast.error(`AI connection failed: ${errorMessage}`)
+      setConnectionStatus({ ok: false, provider, model, message: errorMessage })
+      toast.error(`${provider} connection failed: ${errorMessage}`)
     } finally {
       setTestingConnection(false)
     }
@@ -274,6 +321,65 @@ const Settings = () => {
           </p>
 
           <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-white mb-2">
+                  Primary AI Provider
+                </label>
+                <p className="text-sm text-gray-400 mb-2">
+                  Provider to try first for every AI reply
+                </p>
+                <select
+                  value={settings.ai_primary_provider || 'gemini'}
+                  onChange={(e) => handleChange('ai_primary_provider', e.target.value)}
+                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                >
+                  <option value="gemini">Gemini</option>
+                  <option value="openai">OpenAI</option>
+                  <option value="anthropic">Anthropic</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-white mb-2">
+                  Enable Provider Fallback
+                </label>
+                <p className="text-sm text-gray-400 mb-2">
+                  If primary provider fails, try the next configured providers
+                </p>
+                <div className="flex items-center h-10">
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={(settings.ai_enable_provider_fallback || 'true') === 'true'}
+                      onChange={(e) => handleChange('ai_enable_provider_fallback', e.target.checked ? 'true' : 'false')}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                    <span className="ml-3 text-sm font-medium text-gray-300">
+                      {(settings.ai_enable_provider_fallback || 'true') === 'true' ? 'Enabled' : 'Disabled'}
+                    </span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-white mb-2">
+                Provider Fallback Order
+              </label>
+              <p className="text-sm text-gray-400 mb-2">
+                Comma-separated priority list (example: gemini,openai,anthropic)
+              </p>
+              <input
+                type="text"
+                placeholder="gemini,openai,anthropic"
+                value={settings.ai_provider_priority || ''}
+                onChange={(e) => handleChange('ai_provider_priority', e.target.value)}
+                className="w-full md:w-1/2 px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              />
+            </div>
+
             {/* Gemini API Key */}
             <div>
               <label className="block text-sm font-medium text-white mb-2">
@@ -311,6 +417,70 @@ const Settings = () => {
               />
             </div>
 
+            <div className="pt-2 border-t border-gray-700">
+              <h3 className="text-lg font-semibold text-white mb-4">OpenAI</h3>
+
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-white mb-2">
+                    OpenAI API Key
+                  </label>
+                  <input
+                    type="password"
+                    placeholder="Enter OpenAI API key"
+                    value={settings.ai_openai_api_key || ''}
+                    onChange={(e) => handleChange('ai_openai_api_key', e.target.value)}
+                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-white mb-2">
+                    OpenAI Model
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="gpt-4o-mini"
+                    value={settings.ai_openai_model || ''}
+                    onChange={(e) => handleChange('ai_openai_model', e.target.value)}
+                    className="w-full md:w-1/2 px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-gray-700">
+              <h3 className="text-lg font-semibold text-white mb-4">Anthropic</h3>
+
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-white mb-2">
+                    Anthropic API Key
+                  </label>
+                  <input
+                    type="password"
+                    placeholder="Enter Anthropic API key"
+                    value={settings.ai_anthropic_api_key || ''}
+                    onChange={(e) => handleChange('ai_anthropic_api_key', e.target.value)}
+                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-white mb-2">
+                    Anthropic Model
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="claude-3-5-haiku-latest"
+                    value={settings.ai_anthropic_model || ''}
+                    onChange={(e) => handleChange('ai_anthropic_model', e.target.value)}
+                    className="w-full md:w-1/2 px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+              </div>
+            </div>
+
             <div>
               <button
                 type="button"
@@ -318,13 +488,13 @@ const Settings = () => {
                 disabled={testingConnection}
                 className="px-5 py-2 bg-gray-700 hover:bg-gray-600 disabled:bg-gray-700 disabled:opacity-60 text-white rounded-lg border border-gray-600 transition-colors"
               >
-                {testingConnection ? 'Testing AI Connection...' : 'Test AI Connection'}
+                {testingConnection ? 'Testing Selected Provider...' : 'Test Selected Provider'}
               </button>
               {connectionStatus && (
                 <p className={`mt-3 text-sm ${connectionStatus.ok ? 'text-green-400' : 'text-red-400'}`}>
                   {connectionStatus.ok
-                    ? `Connected using ${connectionStatus.model}.`
-                    : `Connection failed for ${connectionStatus.model}: ${connectionStatus.message}`}
+                    ? `Connected to ${connectionStatus.provider} using ${connectionStatus.model}.`
+                    : `Connection failed for ${connectionStatus.provider} (${connectionStatus.model}): ${connectionStatus.message}`}
                 </p>
               )}
             </div>
