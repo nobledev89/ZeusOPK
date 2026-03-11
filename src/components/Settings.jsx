@@ -39,26 +39,37 @@ const Settings = () => {
   const handleSave = async () => {
     setSaving(true)
     try {
-      // Convert settings object to array of updates
+      // Convert settings object to array of upserts
       const updates = Object.entries(settings).map(([key, value]) => ({
         key,
-        value
+        value,
+        description: '' // Empty description for user-modified settings
       }))
 
-      // Update each setting
+      // Upsert each setting (insert if doesn't exist, update if exists)
       for (const update of updates) {
         const { error } = await supabase
           .from('app_settings')
-          .update({ value: update.value })
-          .eq('key', update.key)
+          .upsert({ 
+            key: update.key, 
+            value: update.value,
+            description: update.description 
+          }, {
+            onConflict: 'key'
+          })
 
-        if (error) throw error
+        if (error) {
+          console.error(`Error saving setting "${update.key}":`, error)
+          throw new Error(`Failed to save "${update.key}": ${error.message}`)
+        }
       }
 
-      toast.success('Settings saved successfully')
+      // Verify settings were saved by fetching them back
+      await fetchSettings()
+      toast.success('Settings saved successfully and verified')
     } catch (error) {
       console.error('Error saving settings:', error)
-      toast.error('Failed to save settings')
+      toast.error(error.message || 'Failed to save settings. Please check console for details.')
     } finally {
       setSaving(false)
     }
