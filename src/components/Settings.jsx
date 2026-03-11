@@ -7,6 +7,8 @@ const Settings = () => {
   const [settings, setSettings] = useState({})
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [testingConnection, setTestingConnection] = useState(false)
+  const [connectionStatus, setConnectionStatus] = useState(null)
 
   useEffect(() => {
     fetchSettings()
@@ -80,6 +82,61 @@ const Settings = () => {
       ...prev,
       [key]: value
     }))
+  }
+
+  const handleTestAiConnection = async () => {
+    const apiKey = (settings.ai_gemini_api_key || '').trim()
+    const model = (settings.ai_gemini_model || 'gemini-2.5-flash').trim()
+
+    if (!apiKey) {
+      toast.error('Please enter the Gemini API key first')
+      return
+    }
+
+    setTestingConnection(true)
+    setConnectionStatus(null)
+
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            contents: [
+              {
+                role: 'user',
+                parts: [{ text: 'Reply with OK only.' }],
+              },
+            ],
+            generationConfig: {
+              maxOutputTokens: 8,
+              temperature: 0,
+            },
+          }),
+        }
+      )
+
+      const data = await response.json().catch(() => ({}))
+
+      if (!response.ok) {
+        const errorMessage = data?.error?.message || `HTTP ${response.status}`
+        setConnectionStatus({ ok: false, model, message: errorMessage })
+        toast.error(`AI connection failed: ${errorMessage}`)
+        return
+      }
+
+      setConnectionStatus({ ok: true, model, message: 'Connection successful' })
+      toast.success(`AI connection successful (${model})`)
+    } catch (error) {
+      const errorMessage = error?.message || 'Network error while testing connection'
+      setConnectionStatus({ ok: false, model, message: errorMessage })
+      toast.error(`AI connection failed: ${errorMessage}`)
+    } finally {
+      setTestingConnection(false)
+    }
   }
 
   if (loading) {
@@ -232,6 +289,9 @@ const Settings = () => {
                 onChange={(e) => handleChange('ai_gemini_api_key', e.target.value)}
                 className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
+              <p className="text-xs text-gray-500 mt-2">
+                Use the test button below to verify this key and model before saving.
+              </p>
             </div>
 
             {/* Gemini Model */}
@@ -249,6 +309,24 @@ const Settings = () => {
                 onChange={(e) => handleChange('ai_gemini_model', e.target.value)}
                 className="w-full md:w-1/2 px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
+            </div>
+
+            <div>
+              <button
+                type="button"
+                onClick={handleTestAiConnection}
+                disabled={testingConnection}
+                className="px-5 py-2 bg-gray-700 hover:bg-gray-600 disabled:bg-gray-700 disabled:opacity-60 text-white rounded-lg border border-gray-600 transition-colors"
+              >
+                {testingConnection ? 'Testing AI Connection...' : 'Test AI Connection'}
+              </button>
+              {connectionStatus && (
+                <p className={`mt-3 text-sm ${connectionStatus.ok ? 'text-green-400' : 'text-red-400'}`}>
+                  {connectionStatus.ok
+                    ? `Connected using ${connectionStatus.model}.`
+                    : `Connection failed for ${connectionStatus.model}: ${connectionStatus.message}`}
+                </p>
+              )}
             </div>
 
             {/* AI Timeout and Limits */}
