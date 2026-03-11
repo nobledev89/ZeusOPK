@@ -1,11 +1,30 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Lock } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const Login = ({ onLogin }) => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [rememberUsername, setRememberUsername] = useState(false)
   const [loading, setLoading] = useState(false)
+
+  // Load any previously saved username on first render
+  useEffect(() => {
+    const saved = localStorage.getItem('admin_saved_username')
+    if (saved) {
+      setUsername(saved)
+      setRememberUsername(true)
+    }
+  }, [])
+
+  // Persist or clear the saved username based on the checkbox
+  useEffect(() => {
+    if (rememberUsername && username) {
+      localStorage.setItem('admin_saved_username', username)
+    } else {
+      localStorage.removeItem('admin_saved_username')
+    }
+  }, [rememberUsername, username])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -69,6 +88,18 @@ const Login = ({ onLogin }) => {
                 className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500"
                 placeholder="Enter your password"
               />
+            </div>
+
+            <div className="flex items-center justify-between text-sm text-gray-300">
+              <label className="inline-flex items-center gap-2 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={rememberUsername}
+                  onChange={(e) => setRememberUsername(e.target.checked)}
+                  className="h-4 w-4 rounded border-gray-600 bg-gray-700 text-primary-500 focus:ring-primary-500"
+                />
+                <span>Save username</span>
+              </label>
             </div>
 
             <button
