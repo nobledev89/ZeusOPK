@@ -403,6 +403,115 @@ const Settings = () => {
               </div>
             </div>
 
+            <div className="pt-2 border-t border-gray-700">
+              <h3 className="text-lg font-semibold text-white mb-4">Conversation Quality</h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-white mb-2">
+                    Enable Conversation Memory
+                  </label>
+                  <p className="text-sm text-gray-400 mb-2">
+                    Include recent messages from the same player as context
+                  </p>
+                  <div className="flex items-center h-10">
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={(settings.ai_context_memory_enabled || 'true') === 'true'}
+                        onChange={(e) => handleChange('ai_context_memory_enabled', e.target.checked ? 'true' : 'false')}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                      <span className="ml-3 text-sm font-medium text-gray-300">
+                        {(settings.ai_context_memory_enabled || 'true') === 'true' ? 'Enabled' : 'Disabled'}
+                      </span>
+                    </label>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-white mb-2">
+                    Memory Messages
+                  </label>
+                  <p className="text-sm text-gray-400 mb-2">
+                    Number of recent lines to include as context
+                  </p>
+                  <input
+                    type="number"
+                    min="0"
+                    max="20"
+                    value={settings.ai_context_memory_messages || ''}
+                    onChange={(e) => handleChange('ai_context_memory_messages', e.target.value)}
+                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-white mb-2">
+                    Memory Max Chars Per Line
+                  </label>
+                  <p className="text-sm text-gray-400 mb-2">
+                    Trim older context lines to this length
+                  </p>
+                  <input
+                    type="number"
+                    min="20"
+                    max="300"
+                    value={settings.ai_context_memory_max_chars || ''}
+                    onChange={(e) => handleChange('ai_context_memory_max_chars', e.target.value)}
+                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-white mb-2">
+                    Avoid Repetitive Phrasing
+                  </label>
+                  <p className="text-sm text-gray-400 mb-2">
+                    Ask AI to vary openers and sentence style
+                  </p>
+                  <div className="flex items-center h-10">
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={(settings.ai_avoid_repetitive_phrasing || 'true') === 'true'}
+                        onChange={(e) => handleChange('ai_avoid_repetitive_phrasing', e.target.checked ? 'true' : 'false')}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                      <span className="ml-3 text-sm font-medium text-gray-300">
+                        {(settings.ai_avoid_repetitive_phrasing || 'true') === 'true' ? 'Enabled' : 'Disabled'}
+                      </span>
+                    </label>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-white mb-2">
+                    Allow Emojis In Replies
+                  </label>
+                  <p className="text-sm text-gray-400 mb-2">
+                    If disabled, replies are plain text without emojis
+                  </p>
+                  <div className="flex items-center h-10">
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={(settings.ai_response_emojis_enabled || 'false') === 'true'}
+                        onChange={(e) => handleChange('ai_response_emojis_enabled', e.target.checked ? 'true' : 'false')}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                      <span className="ml-3 text-sm font-medium text-gray-300">
+                        {(settings.ai_response_emojis_enabled || 'false') === 'true' ? 'Enabled' : 'Disabled'}
+                      </span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Gemini API Key */}
             <div>
               <label className="block text-sm font-medium text-white mb-2">
