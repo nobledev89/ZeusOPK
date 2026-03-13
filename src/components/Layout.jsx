@@ -6,6 +6,7 @@ import {
   CreditCard, 
   Server, 
   FileText, 
+  BookOpen,
   Settings, 
   LogOut 
 } from 'lucide-react'
@@ -27,6 +28,7 @@ const Layout = ({ children, onLogout }) => {
     { path: '/tiers', icon: CreditCard, label: 'Subscription Tiers' },
     { path: '/servers', icon: Server, label: 'Game Servers' },
     { path: '/logs', icon: FileText, label: 'Audit Logs' },
+    { path: '/docs', icon: BookOpen, label: 'Documentation' },
     { path: '/settings', icon: Settings, label: 'Settings' },
   ]
 

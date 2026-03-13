@@ -10,6 +10,7 @@ import SubscriptionTiers from './components/SubscriptionTiers'
 import GameServers from './components/GameServers'
 import AuditLogs from './components/AuditLogs'
 import Settings from './components/Settings'
+import Documentation from './components/Documentation'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -69,6 +70,7 @@ function App() {
           <Route path="/servers" element={<GameServers />} />
           <Route path="/logs" element={<AuditLogs />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/docs" element={<Documentation />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Layout>
