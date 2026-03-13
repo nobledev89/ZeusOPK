@@ -3,250 +3,178 @@ import {
   BookOpen,
   Search,
   CheckCircle2,
-  Wrench,
-  Shield,
   Users,
-  ShoppingBag,
   Bot,
-  ServerCog,
+  ShoppingBag,
+  Shield,
   MessageSquareMore,
-  AlertTriangle,
-  Rocket,
-  HelpCircle
+  LifeBuoy
 } from 'lucide-react'
+
+const quickStart = {
+  id: 'quick-start',
+  title: 'Universal Quick Start',
+  icon: BookOpen,
+  summary: 'Use this once, then continue with the role tutorial that matches your account goal.',
+  steps: [
+    'Open ZeusOPK Manager and create a new account from template, or duplicate a stable working account.',
+    'Set login credentials, character slot, lock map, and security PIN before starting the bot.',
+    'Choose the role you are building: Farmer, Collector/Vendor, or Support/Master.',
+    'Save your settings, start one account first, and confirm expected behavior in logs before scaling.'
+  ],
+  checks: [
+    'Account launches without missing field errors.',
+    'Security flow completes on startup.',
+    'Role-specific behavior triggers correctly in the first test run.'
+  ]
+}
+
+const roleGuides = [
+  {
+    id: 'farmer',
+    label: 'Farmer',
+    title: 'Farmer Path: Build a Stable Loot Runner',
+    icon: Bot,
+    summary: 'Best for users running combat accounts that farm and feed collector pipelines.',
+    bestFor: 'Solo or multi-account farming with controlled chat behavior.',
+    steps: [
+      'Set account type to Combat/Farmer and confirm lock map, movement, and combat behavior.',
+      'Configure pickup, auto-sell, and weight thresholds to prevent inventory stalls.',
+      'Enable AI auto-response and tune reply cooldown so chat behavior looks less repetitive and less bot-like.',
+      'Set collector delivery target if this farmer will hand off loot to a vending account.',
+      'Run test session for at least 10 minutes and check for repeated loop errors.'
+    ],
+    checks: [
+      'Combat loop runs without map-lock breaks.',
+      'Auto-sell/storage is triggered only when needed.',
+      'AI replies are enabled and not spamming.'
+    ]
+  },
+  {
+    id: 'collector-vendor',
+    label: 'Collector/Vendor',
+    title: 'Collector Path: Receive, Store, and Keep Vending Active',
+    icon: ShoppingBag,
+    summary: 'Best for users monetizing through continuous vending while receiving loot from delivery bots.',
+    bestFor: 'Trade-controlled collector accounts that stay online as the vending anchor.',
+    steps: [
+      'Set account type to Collector and enable vending mode.',
+      'Add allowed bot names so only approved delivery accounts can trigger trade handoff.',
+      'Enable close-shop-when-trading, so collector can process deals then reopen vending smoothly.',
+      'Configure collection map/coordinates and trade distance to match real movement paths.',
+      'Set Kafra fallback and storage weight thresholds to avoid overweight deadlocks.'
+    ],
+    checks: [
+      'Collector accepts deals only from approved names.',
+      'Vending reopens correctly after trade cycles.',
+      'Storage fallback works before cart/inventory reaches hard limit.'
+    ]
+  },
+  {
+    id: 'support-master',
+    label: 'Support/Master',
+    title: 'Support Path: Master-Led Party Automation',
+    icon: Users,
+    summary: 'Best for priest/buffer style accounts that follow a master and automate party upkeep.',
+    bestFor: 'Support characters assisting one or more master farming accounts.',
+    steps: [
+      'Set account type to Support and turn on no-attack behavior.',
+      'Set follow target to your master character and tune min/max follow distance.',
+      'Enable auto party create/invite and auto-approve invites so masters are always grouped quickly.',
+      'Configure support skills and self skills with sensible cooldowns and trigger conditions.',
+      'Run a two-account test (master + support) and verify support reacts on every combat pull.'
+    ],
+    checks: [
+      'Support stays in range of the master.',
+      'Auto party invite flow works for every master listed.',
+      'Skill triggers fire reliably without lockups or spam.'
+    ]
+  },
+]
 
 const docs = [
   {
-    id: 'overview',
-    title: 'Platform Overview',
-    icon: BookOpen,
-    summary: 'How Zeus OPK Manager and the Admin Portal fit together.',
+    id: 'ai-chat-guard',
+    title: 'AI Auto-Response and Chat Safety',
+    icon: MessageSquareMore,
+    summary: 'Use AI replies to keep conversations natural and reduce repetitive patterns that draw manual bot checks.',
     steps: [
-      'Use the Admin Portal to manage users, sessions, tiers, game server metadata, logs, and global app settings.',
-      'Use Zeus OPK Manager (desktop app) to create bot accounts and configure bot behavior per account folder.',
-      'Most bot behavior is file-based per account (`control/config.txt`, `items_control.txt`, `macros.txt`, etc.), so settings are account-specific unless copied from a template/duplicate.'
+      'Enable AI reply for accounts that interact with public chat.',
+      'Keep reply cooldown active so responses look paced instead of instant.',
+      'Use varied response prompts to avoid identical sentence repetition.',
+      'Set maximum reply length so responses stay short and human-like.'
     ],
     checks: [
-      'Admin team can sign in to the web portal.',
-      'Desktop users can open bot settings and save configs.',
-      'Each bot folder has a `control` directory.'
-    ]
-  },
-  {
-    id: 'new-account-checklist',
-    title: 'New Account Setup Checklist',
-    icon: CheckCircle2,
-    summary: 'Fast path for creating a reliable new bot account.',
-    steps: [
-      'Create bot from template (or duplicate a known-good account if you want the same behavior copied).',
-      'Set account type first: Combat, Support, or Collector.',
-      'In Login tab, set server credentials, character slot, lock map, and optional OTP seed.',
-      'Enable "Run @security automatically on every login" and set security PIN.',
-      'Set item pickup/sell/storage settings.',
-      'If using collector workflow, configure collector settings and allowed names before starting.',
-      'Run the bot and verify logs for successful security and deal flow.'
-    ],
-    checks: [
-      'Security macro runs on startup.',
-      'No empty required fields for collector/support workflow.',
-      'Bot reaches map/coordinates and performs expected action.'
-    ]
-  },
-  {
-    id: 'account-types',
-    title: 'Account Types: Combat, Support, Collector',
-    icon: Users,
-    summary: 'When to use each account type and what it changes.',
-    steps: [
-      'Combat: normal farming/looting account.',
-      'Support: non-combat helper with follow/party automation and skill automation.',
-      'Collector: dedicated receiver/storage/selling/vending account for other bots.',
-      'Collector account defaults disable attack/pickup combat flow and focus on deal/shop/storage behavior.'
-    ],
-    checks: [
-      'Account type in settings matches intended role.',
-      'Support and Collector accounts are not left in combat defaults.'
+      'Replies trigger only on relevant messages.',
+      'No rapid-fire responses in crowded maps.',
+      'Conversation tone remains short and believable.'
     ]
   },
   {
     id: 'security',
-    title: 'Security and Login PIN',
+    title: 'Security-on-Login Baseline',
     icon: Shield,
-    summary: 'How @security is triggered every login for all account types.',
+    summary: 'Protect every role with the same startup security discipline.',
     steps: [
-      'Enable "Run @security automatically on every login" in bot settings.',
-      'Set a valid security PIN so the macro can complete menu input (`do talk text <pin>`).',
-      'Save settings; manager updates `macros.txt` with startup hook and security macro.',
-      'On next login, confirm from logs that security flow completed before other sensitive actions (deal/shop).'
+      'Enable security command execution on every login.',
+      'Set and verify the correct security PIN for each account.',
+      'Restart the bot and confirm security completes before trade, chat, and vending actions.',
+      'If security fails, correct the PIN first before tuning any other feature.'
     ],
     checks: [
-      'PIN is not empty or outdated.',
-      'Macro exists and startup hook is present.',
-      'No repeated security prompt loop in logs.'
-    ]
-  },
-  {
-    id: 'items-sell-storage',
-    title: 'Items, Auto-Sell, and Auto-Storage',
-    icon: ShoppingBag,
-    summary: 'Correct placement of sell settings and storage behavior.',
-    steps: [
-      'Configure NPC sell coordinates in Items > Auto-Sell tab (`sellAuto_npc`).',
-      'Enable/disable NPC auto-sell there (`sellAuto`) and maintain the Auto-Sell item list.',
-      'Configure Storage NPC in Items > Storage tab (`storageAuto_npc`).',
-      'If collector workflow is enabled for a bot, collector Kafra settings override normal auto-storage Kafra behavior.'
-    ],
-    checks: [
-      'Auto-Sell tab has correct NPC map and coordinates.',
-      'Storage tab Kafra NPC is valid when fallback storage is expected.',
-      'Item IDs in `items_control.txt` match intended sell/store flags.'
-    ]
-  },
-  {
-    id: 'collector-delivery-bot',
-    title: 'Collector Workflow: Delivery Bot Setup',
-    icon: Bot,
-    summary: 'How regular bots deliver loot to a collector account.',
-    steps: [
-      'Enable collector workflow on the delivery bot.',
-      'Set collector character name, collection map, and collection coordinates.',
-      'Set delivery weight threshold and trade distance.',
-      'Use matching collector name and map/coords that the collector can actually reach.',
-      'Keep security-on-login enabled so deal flow is allowed when required.'
-    ],
-    checks: [
-      'Collector name is exact (case-insensitive matching still expects correct name).',
-      'Both bots are on same map context when trading starts.',
-      'Logs show move-to-collector then deal attempt.'
-    ]
-  },
-  {
-    id: 'collector-account',
-    title: 'Collector Account Setup (Vending and Deal Control)',
-    icon: ServerCog,
-    summary: 'Full collector account behavior, including vending and storage fallback.',
-    steps: [
-      'Set account type to Collector.',
-      'Enable automatic vending if desired.',
-      'Enable "Close shop when allowed bot is nearby to start trade" for smoother handoff.',
-      'Populate allowed bot names list (one per line) so only approved bots transact.',
-      'Set shop title and shop items (item ID, name, price, amount).',
-      'Enable direct NPC selling only when needed; it uses Auto-Sell item list and Auto-Sell NPC coordinates.',
-      'Set collector Kafra settings and store-to-kafra weight threshold to avoid overweight stalls.'
-    ],
-    checks: [
-      'Allowed bot names include every delivery bot.',
-      'Shop item IDs and names are valid and match inventory.',
-      'Collector has reachable Kafra fallback for cart/full inventory states.'
-    ]
-  },
-  {
-    id: 'support-setup',
-    title: 'Support Account Setup',
-    icon: Users,
-    summary: 'Support core behavior, follow/party automation, and support/self skills.',
-    steps: [
-      'Set account type to Support.',
-      'In Support Core, enable no-attack mode and follow behavior as needed.',
-      'Set follow target and min/max follow distance.',
-      'Configure lock map and optional loot behavior.',
-      'Set party automation: auto-create, auto-invite from `party.txt`, auto-approve party invites.',
-      'Set security PIN and enable security on login.',
-      'Use Party Skills and Self Skills tabs to configure trigger conditions and cooldowns.'
-    ],
-    checks: [
-      'Follow target is online and reachable.',
-      'Party members list format is valid (`Name 1`).',
-      'Skill rules are enabled and have sane cooldown values.'
-    ]
-  },
-  {
-    id: 'chat-ai',
-    title: 'Chat and AI Reply Configuration',
-    icon: MessageSquareMore,
-    summary: 'Per-bot chat behavior plus global AI provider controls in Admin Portal.',
-    steps: [
-      'Use bot Chat tab for static keyword replies and bot-level AI behavior toggles.',
-      'Use Admin Portal Settings for global AI provider keys, model selection, fallback order, and timeouts.',
-      'Test provider connection in portal before enabling globally.',
-      'Tune cooldown, max reply length, and memory settings to reduce spam-like behavior.'
-    ],
-    checks: [
-      'Global API key exists for selected provider.',
-      'Bot has AI enabled if you expect responses.',
-      'Public trigger prefix is set if public chat mode is on.'
-    ]
-  },
-  {
-    id: 'troubleshooting',
-    title: 'Troubleshooting: Deals, Lag, Crashes, Session Expiry',
-    icon: AlertTriangle,
-    summary: 'Most common runtime issues and quick diagnostics.',
-    steps: [
-      'Deal not starting: verify collector/delivery names, allowed list, map proximity, and security completion logs.',
-      'Bot not giving loot: check weight threshold, trade distance, and whether collector is visible on map.',
-      'Shop does not reopen: verify auto-vending enabled and close-for-trade logic not blocked by ongoing state.',
-      'Lag/crash after minutes: inspect process memory/CPU, check repetitive log loops, and reduce aggressive polling/macros.',
-      'Session expired: review timeout policy in portal settings and ensure client clocks/network are stable.'
-    ],
-    checks: [
-      'Always inspect both sides: delivery bot log and collector bot log.',
-      'Confirm there is no stale/dead process using old binaries.',
-      'Validate config saved to the correct account folder.'
-    ]
-  },
-  {
-    id: 'release',
-    title: 'Build and Release Deployment',
-    icon: Rocket,
-    summary: 'How to ensure users run the updated binary.',
-    steps: [
-      'Use one release path consistently (recommended: `bin/Release/net8.0-windows`).',
-      'Close running ZeusOPK process before overwriting that exact output path.',
-      'Run Release build, then verify updated timestamp for `ZeusOPK.exe` in the target path.',
-      'Avoid mixing alternate output folders unless intentionally used for hotfix testing.'
-    ],
-    checks: [
-      'Only one active release executable path is distributed.',
-      'Running process path matches the freshly built file path.',
-      'Users are not launching old Debug or archived builds.'
+      'PIN is saved and current.',
+      'Startup security action appears in logs.',
+      'No repeated security prompt loop.'
     ]
   },
   {
     id: 'faq',
-    title: 'FAQ',
-    icon: HelpCircle,
-    summary: 'Answers to frequent operator questions.',
+    title: 'Subscriber FAQ',
+    icon: LifeBuoy,
+    summary: 'Fast answers for common subscriber-side setup and runtime issues.',
     faqs: [
       {
-        q: 'Will collector/support features work for new accounts?',
-        a: 'Yes, the logic is account-type and setting driven, not hardcoded to one bot name. New accounts must still be configured or duplicated from a configured account.'
+        q: 'Can I use one template for all account types?',
+        a: 'Yes. Duplicate a stable template, then switch role-specific settings for Farmer, Collector, or Support before starting.'
       },
       {
-        q: 'Where do I set NPC coordinates for direct item selling?',
-        a: 'In Items > Auto-Sell tab using the Sell NPC field. This is separate from Storage NPC.'
+        q: 'How do I keep collector vending while receiving loot?',
+        a: 'Enable collector role, set allowed delivery names, and use close-for-trade + auto-reopen vending behavior.'
       },
       {
-        q: 'Does collector workflow override normal Kafra auto-storage?',
-        a: 'Yes. When collector workflow is enabled, collector Kafra behavior overrides regular auto-storage Kafra behavior.'
+        q: 'How does auto party invite work for masters?',
+        a: 'In Support role, enable party automation, set master names in party list, and keep auto-approve party invites enabled.'
       },
       {
-        q: 'Why am I still seeing old behavior after a build?',
-        a: 'You are likely launching a different executable path than the one you rebuilt.'
+        q: 'Why is AI auto-response important?',
+        a: 'It helps avoid repetitive chat patterns by varying responses and timing, which lowers obvious bot-like behavior in public chat.'
       },
       {
-        q: 'Should auto-sell item list be empty?',
-        a: 'Yes, empty is valid. It simply means no items are selected for direct NPC auto-sell.'
-      },
-      {
-        q: 'Why does @security not run?',
-        a: 'Confirm the per-account login security toggle is enabled and a valid security PIN is saved in that account settings.'
+        q: 'What should I do when behavior suddenly changes?',
+        a: 'Run one account only, review current settings, and validate role-specific checks before scaling back to full multi-account mode.'
       }
     ]
   }
 ]
 
 const normalized = (value) => (value || '').toLowerCase()
+
+const mergeText = (items) => items.filter(Boolean).join(' ')
+
+const roleMatchesQuery = (role, query) => {
+  if (!query) return true
+
+  return normalized(
+    mergeText([
+      role.label,
+      role.title,
+      role.summary,
+      role.bestFor,
+      ...(role.steps || []),
+      ...(role.checks || [])
+    ])
+  ).includes(query)
+}
 
 const sectionMatchesQuery = (section, query) => {
   if (!query) return true
@@ -264,19 +192,30 @@ const sectionMatchesQuery = (section, query) => {
 
 const Documentation = () => {
   const [queryInput, setQueryInput] = useState('')
+  const [selectedRoleId, setSelectedRoleId] = useState(roleGuides[0].id)
   const query = normalized(queryInput.trim())
 
+  const matchingRoles = useMemo(
+    () => roleGuides.filter((role) => roleMatchesQuery(role, query)),
+    [query]
+  )
+
+  const activeRole = useMemo(() => {
+    return matchingRoles.find((role) => role.id === selectedRoleId) || matchingRoles[0] || null
+  }, [matchingRoles, selectedRoleId])
+  const ActiveRoleIcon = activeRole?.icon || Users
+
   const filteredDocs = useMemo(
-    () => docs.filter(section => sectionMatchesQuery(section, query)),
+    () => [quickStart, ...docs].filter(section => sectionMatchesQuery(section, query)),
     [query]
   )
 
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">Documentation</h1>
+        <h1 className="text-3xl font-bold text-white mb-2">Subscriber Setup Guide</h1>
         <p className="text-gray-400">
-          Tutorial-style guide for setup, daily operations, and troubleshooting.
+          Sales-ready onboarding docs for subscribers: role-based setup, daily operation, and troubleshooting.
         </p>
       </div>
 
@@ -288,7 +227,7 @@ const Documentation = () => {
           <div>
             <h2 className="text-lg font-semibold text-white">How to use this guide</h2>
             <p className="text-sm text-gray-400">
-              Search by keyword (example: collector, security, auto-sell, support, crash).
+              Pick your role path, then follow the step-by-step sequence from top to bottom.
             </p>
           </div>
         </div>
@@ -299,15 +238,76 @@ const Documentation = () => {
             type="text"
             value={queryInput}
             onChange={(event) => setQueryInput(event.target.value)}
-            placeholder="Search documentation..."
+            placeholder="Search by role or feature (collector, support, AI, party)..."
             className="w-full pl-9 pr-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500"
           />
         </label>
 
         <p className="mt-3 text-xs text-gray-500">
-          Showing {filteredDocs.length} of {docs.length} sections.
+          Showing {filteredDocs.length} tutorial sections and {matchingRoles.length} role paths.
         </p>
       </div>
+
+      {matchingRoles.length > 0 && (
+        <div className="bg-gray-800 rounded-lg border border-gray-700 p-4 mb-6">
+          <h2 className="text-sm font-semibold text-gray-200 mb-3">Choose Your Role Path</h2>
+          <div className="flex flex-wrap gap-2">
+            {matchingRoles.map((role) => (
+              <button
+                key={role.id}
+                type="button"
+                onClick={() => setSelectedRoleId(role.id)}
+                className={`px-3 py-1.5 text-xs rounded-md border transition-colors ${
+                  activeRole?.id === role.id
+                    ? 'border-cyan-400 bg-cyan-500/20 text-cyan-200'
+                    : 'border-gray-600 bg-gray-700 text-gray-200 hover:bg-gray-600'
+                }`}
+              >
+                {role.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {activeRole && (
+        <section
+          id={activeRole.id}
+          className="bg-gray-800 rounded-lg border border-gray-700 p-6 scroll-mt-24 mb-6"
+        >
+          <div className="flex items-start gap-3 mb-4">
+            <div className="p-2 rounded-lg bg-primary-600/20 text-primary-300 shrink-0">
+              <ActiveRoleIcon className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-xl font-semibold text-white">{activeRole.title}</h2>
+              <p className="text-sm text-gray-400 mt-1">{activeRole.summary}</p>
+              <p className="text-xs text-cyan-200 mt-2">{activeRole.bestFor}</p>
+            </div>
+          </div>
+
+          <div className="mb-5">
+            <h3 className="text-sm font-semibold text-gray-200 mb-2">Step-by-Step</h3>
+            <ol className="space-y-2 list-decimal list-inside text-sm text-gray-300">
+              {activeRole.steps.map((step) => (
+                <li key={step}>{step}</li>
+              ))}
+            </ol>
+          </div>
+
+          <div>
+            <h3 className="text-sm font-semibold text-gray-200 mb-2">Validation Checklist</h3>
+            <ul className="space-y-2 text-sm text-gray-300">
+              {activeRole.checks.map((check) => (
+                <li key={check} className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-300 mt-0.5 shrink-0" />
+                  <span>{check}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )}
 
       {filteredDocs.length > 0 && (
         <div className="bg-gray-800 rounded-lg border border-gray-700 p-4 mb-6">
@@ -362,7 +362,7 @@ const Documentation = () => {
                   <ul className="space-y-2 text-sm text-gray-300">
                     {section.checks.map((check) => (
                       <li key={check} className="flex items-start gap-2">
-                        <Wrench className="w-4 h-4 text-primary-300 mt-0.5 shrink-0" />
+                        <CheckCircle2 className="w-4 h-4 text-emerald-300 mt-0.5 shrink-0" />
                         <span>{check}</span>
                       </li>
                     ))}
@@ -375,7 +375,7 @@ const Documentation = () => {
                   <h3 className="text-sm font-semibold text-gray-200 mb-2">Questions</h3>
                   <div className="space-y-2">
                     {section.faqs.map((item) => (
-                      <details key={item.q} className="rounded-lg border border-gray-700 bg-gray-750 p-3">
+                      <details key={item.q} className="rounded-lg border border-gray-700 bg-gray-700 p-3">
                         <summary className="text-sm font-medium text-white cursor-pointer select-none">
                           {item.q}
                         </summary>
@@ -390,9 +390,9 @@ const Documentation = () => {
         })}
       </div>
 
-      {filteredDocs.length === 0 && (
+      {filteredDocs.length === 0 && matchingRoles.length === 0 && (
         <div className="bg-gray-800 rounded-lg border border-gray-700 p-8 text-center">
-          <p className="text-gray-300 text-sm">No documentation sections match your search.</p>
+          <p className="text-gray-300 text-sm">No setup paths match your search.</p>
         </div>
       )}
     </div>
