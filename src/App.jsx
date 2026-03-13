@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import Layout from './components/Layout'
 import Login from './components/Login'
@@ -11,6 +11,20 @@ import GameServers from './components/GameServers'
 import AuditLogs from './components/AuditLogs'
 import Settings from './components/Settings'
 import Documentation from './components/Documentation'
+import PublicLayout from './components/PublicLayout'
+import LandingPage from './components/LandingPage'
+
+function AdminRoute({ isAuthenticated, onLogout }) {
+  if (!isAuthenticated) {
+    return <Navigate to="/admin/login" replace />
+  }
+
+  return (
+    <Layout onLogout={onLogout}>
+      <Outlet />
+    </Layout>
+  )
+}
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -40,40 +54,47 @@ function App() {
     )
   }
 
-  if (!isAuthenticated) {
-    return (
-      <>
-        <Login onLogin={handleLogin} />
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            duration: 3000,
-            style: {
-              background: '#1f2937',
-              color: '#fff',
-              border: '1px solid #374151',
-            },
-          }}
-        />
-      </>
-    )
-  }
-
   return (
     <Router>
-      <Layout onLogout={handleLogout}>
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/users" element={<UserList />} />
-          <Route path="/sessions" element={<SessionsList />} />
-          <Route path="/tiers" element={<SubscriptionTiers />} />
-          <Route path="/servers" element={<GameServers />} />
-          <Route path="/logs" element={<AuditLogs />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/docs" element={<Documentation />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Layout>
+      <Routes>
+        <Route
+          path="/admin/login"
+          element={isAuthenticated ? <Navigate to="/admin" replace /> : <Login onLogin={handleLogin} />}
+        />
+
+        <Route
+          path="/admin"
+          element={<AdminRoute isAuthenticated={isAuthenticated} onLogout={handleLogout} />}
+        >
+          <Route index element={<Dashboard />} />
+          <Route path="users" element={<UserList />} />
+          <Route path="sessions" element={<SessionsList />} />
+          <Route path="tiers" element={<SubscriptionTiers />} />
+          <Route path="servers" element={<GameServers />} />
+          <Route path="logs" element={<AuditLogs />} />
+          <Route path="settings" element={<Settings />} />
+        </Route>
+
+        <Route
+          path="/"
+          element={
+            <PublicLayout>
+              <LandingPage />
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="/docs"
+          element={
+            <PublicLayout>
+              <Documentation />
+            </PublicLayout>
+          }
+        />
+        <Route path="/documentation" element={<Navigate to="/docs" replace />} />
+        <Route path="/login" element={<Navigate to="/admin/login" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
       <Toaster
         position="top-right"
         toastOptions={{

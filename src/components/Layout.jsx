@@ -17,19 +17,19 @@ const Layout = ({ children, onLogout }) => {
   const handleLogout = () => {
     if (window.confirm('Are you sure you want to logout?')) {
       onLogout()
-      navigate('/login')
+      navigate('/admin/login')
     }
   }
 
   const navItems = [
-    { path: '/', icon: LayoutDashboard, label: 'Dashboard' },
-    { path: '/users', icon: Users, label: 'Users' },
-    { path: '/sessions', icon: Activity, label: 'Active Sessions' },
-    { path: '/tiers', icon: CreditCard, label: 'Subscription Tiers' },
-    { path: '/servers', icon: Server, label: 'Game Servers' },
-    { path: '/logs', icon: FileText, label: 'Audit Logs' },
+    { path: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
+    { path: '/admin/users', icon: Users, label: 'Users' },
+    { path: '/admin/sessions', icon: Activity, label: 'Active Sessions' },
+    { path: '/admin/tiers', icon: CreditCard, label: 'Subscription Tiers' },
+    { path: '/admin/servers', icon: Server, label: 'Game Servers' },
+    { path: '/admin/logs', icon: FileText, label: 'Audit Logs' },
     { path: '/docs', icon: BookOpen, label: 'Documentation' },
-    { path: '/settings', icon: Settings, label: 'Settings' },
+    { path: '/admin/settings', icon: Settings, label: 'Settings' },
   ]
 
   return (
@@ -46,7 +46,7 @@ const Layout = ({ children, onLogout }) => {
             <NavLink
               key={item.path}
               to={item.path}
-              end={item.path === '/'}
+              end={item.path === '/admin'}
               className={({ isActive }) =>
                 `flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
                   isActive
