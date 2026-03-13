@@ -11,6 +11,7 @@ import GameServers from './components/GameServers'
 import AuditLogs from './components/AuditLogs'
 import Settings from './components/Settings'
 import Documentation from './components/Documentation'
+import Downloads from './components/Downloads'
 import PublicLayout from './components/PublicLayout'
 import LandingPage from './components/LandingPage'
 
@@ -88,6 +89,14 @@ function App() {
           element={
             <PublicLayout>
               <Documentation />
+            </PublicLayout>
+          }
+        />
+        <Route
+          path="/downloads"
+          element={
+            <PublicLayout>
+              <Downloads />
             </PublicLayout>
           }
         />

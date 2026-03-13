@@ -27,6 +27,12 @@ const PublicLayout = ({ children }) => {
             >
               Documentation
             </Link>
+            <Link
+              to="/downloads"
+              className="px-3 py-2 text-sm rounded-md border border-slate-700 bg-slate-900/60 hover:bg-slate-800 transition-colors"
+            >
+              Downloads
+            </Link>
           </nav>
         </div>
       </header>
